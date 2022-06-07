@@ -19,10 +19,10 @@ export default function isValidCPF(cpf: string): boolean {
 		return false;
 	}
 
-	var sum = 0;
-	var leftover;
+	let sum = 0;
+	let leftover;
 
-	for (var i = 1; i <= 9; i++) {
+	for (let i = 1; i <= 9; i++) {
 		sum = sum + parseInt(cpf.substring(i - 1, i)) * (11 - i);
 	}
 
@@ -38,7 +38,7 @@ export default function isValidCPF(cpf: string): boolean {
 
 	sum = 0;
 
-	for (var i = 1; i <= 10; i++) {
+	for (let i = 1; i <= 10; i++) {
 		sum = sum + parseInt(cpf.substring(i - 1, i)) * (12 - i);
 	}
 

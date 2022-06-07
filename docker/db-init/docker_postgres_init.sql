@@ -7,17 +7,18 @@ CREATE TABLE Users (
 	username VARCHAR(255) NOT NULL,
 	password VARCHAR(255) NOT NULL,
 	email VARCHAR(255) NOT NULL,
+	roles VARCHAR(255) NOT NULL,
 	created_at TIMESTAMP DEFAULT NOW(),
 	updated_at TIMESTAMP DEFAULT NOW()
 );
 
-insert into users (username, password, email) values ('mperacco0', '95vbGeavA', 'gspirit0@bizjournals.com');
-insert into users (username, password, email) values ('rguesford1', 'Jkmn7ZvtmVmT', 'lskamal1@goo.ne.jp');
-insert into users (username, password, email) values ('wsugden2', 'Z0X50VEG', 'wmatissoff2@friendfeed.com');
-insert into users (username, password, email) values ('lmchale3', 'bR8fKSHesV', 'bdachs3@privacy.gov.au');
-insert into users (username, password, email) values ('abrimble4', 'NDJ1LjJ75tL', 'nhamper4@unesco.org');
-insert into users (username, password, email) values ('pgundrey5', 'GAAYWHjU1a', 'bfruen5@hatena.ne.jp');
-insert into users (username, password, email) values ('gpraill6', 'ZZOxT7', 'msambidge6@timesonline.co.uk');
-insert into users (username, password, email) values ('krayman7', 'fnKErejPH', 'clauga7@usnews.com');
-insert into users (username, password, email) values ('dthornton8', 'rCBsUjuxlRI6', 'grizzolo8@tiny.cc');
-insert into users (username, password, email) values ('hkinnerk9', 'wOx8XxpE4Fu0', 'collerhead9@ucla.edu');
+insert into users (username, password, email, roles) values ('mperacco0', '95vbGeavA', 'gspirit0@bizjournals.com', 'user');
+insert into users (username, password, email, roles) values ('rguesford1', 'Jkmn7ZvtmVmT', 'lskamal1@goo.ne.jp', 'user');
+insert into users (username, password, email, roles) values ('wsugden2', 'Z0X50VEG', 'wmatissoff2@friendfeed.com', 'user');
+insert into users (username, password, email, roles) values ('lmchale3', 'bR8fKSHesV', 'bdachs3@privacy.gov.au', 'user');
+insert into users (username, password, email, roles) values ('abrimble4', 'NDJ1LjJ75tL', 'nhamper4@unesco.org', 'user');
+insert into users (username, password, email, roles) values ('pgundrey5', 'GAAYWHjU1a', 'bfruen5@hatena.ne.jp', 'user');
+insert into users (username, password, email, roles) values ('gpraill6', 'ZZOxT7', 'msambidge6@timesonline.co.uk', 'user');
+insert into users (username, password, email, roles) values ('krayman7', 'fnKErejPH', 'clauga7@usnews.com', 'user');
+insert into users (username, password, email, roles) values ('dthornton8', 'rCBsUjuxlRI6', 'grizzolo8@tiny.cc', 'user');
+insert into users (username, password, email, roles) values ('hkinnerk9', 'wOx8XxpE4Fu0', 'collerhead9@ucla.edu', 'user');

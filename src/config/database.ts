@@ -1,6 +1,6 @@
-import { Pool, QueryArrayConfig } from 'pg';
+import { Pool, QueryResult, QueryResultRow } from 'pg';
 
-import config from './';
+import config from './configuration';
 import logger from './logger';
 
 const pool = new Pool({
@@ -15,7 +15,10 @@ pool.on('error', (err) => {
 	logger.error(err);
 });
 
-const query = (queryText: string, params?: Array<any>) =>
+const query = async (
+	queryText: string,
+	params?: any[]
+): Promise<QueryResult<QueryResultRow>> =>
 	pool.query(queryText, params);
 
 export default query;

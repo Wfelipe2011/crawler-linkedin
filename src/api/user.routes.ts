@@ -1,7 +1,6 @@
 import { Router } from 'express';
 
 import logger from '../config/logger';
-import User from '../entities/User';
 import UserRepository from '../repositories/UserRepository';
 import UserService from '../services/UserService';
 

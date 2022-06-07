@@ -1,3 +1,5 @@
+import { QueryResultRow } from 'pg';
+
 import query from '../config/database';
 import IRepository from '../interfaces/IRepository';
 import IUser from '../interfaces/IUser';
@@ -6,31 +8,48 @@ class UserRepository implements IRepository {
 	users: IUser[];
 
 	constructor() {
-		this.users = [
-			{
-				id: 1,
-				name: 'John Doe',
-				email: 'john@doe.com',
-				password: '123456',
-				roles: ['admin'],
-			},
-			{
-				id: 2,
-				name: 'Jane Doe',
-				email: 'jane@doe.com',
-				password: '123456',
-				roles: ['user'],
-			},
-		];
+		this.users = [];
 	}
 
 	async getAll(): Promise<IUser[]> {
 		const { rows } = await query('SELECT * FROM Tegra.users');
-		return rows;
+
+		const users: IUser[] = rows.map((row: QueryResultRow) => {
+			return {
+				id: row.id,
+				name: row.name,
+				email: row.email,
+				password: row.password,
+				roles: row.roles,
+				createdAt: row.created_at,
+				updatedAt: row.updated_at,
+			};
+		});
+
+		return users;
 	}
 
 	async getById(id: number): Promise<IUser | undefined> {
-		return this.users.find((user) => user.id === id);
+		const { rows } = await query(
+			'SELECT * FROM Tegra.users WHERE id = $1',
+			[id]
+		);
+
+		const user: IUser | undefined = rows.map(
+			(row: QueryResultRow) => {
+				return {
+					id: row.id,
+					name: row.name,
+					email: row.email,
+					password: row.password,
+					roles: row.roles,
+					createdAt: row.created_at,
+					updatedAt: row.updated_at,
+				};
+			}
+		)[0];
+
+		return user;
 	}
 
 	async create(user: IUser): Promise<void> {
@@ -44,19 +63,6 @@ class UserRepository implements IRepository {
 
 	async delete(id: number): Promise<void> {
 		this.users = this.users.filter((user) => user.id !== id);
-	}
-
-	async getByEmail(email: string): Promise<IUser | undefined> {
-		return this.users.find((user) => user.email === email);
-	}
-
-	async getByEmailAndPassword(
-		email: string,
-		password: string
-	): Promise<IUser | undefined> {
-		return this.users.find(
-			(user) => user.email === email && user.password === password
-		);
 	}
 }
 
