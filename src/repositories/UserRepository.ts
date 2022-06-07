@@ -1,5 +1,3 @@
-import { QueryResultRow } from 'pg';
-
 import query from '../config/database';
 import IRepository from '../interfaces/IRepository';
 import IUser from '../interfaces/IUser';
@@ -14,7 +12,7 @@ class UserRepository implements IRepository {
 	async getAll(): Promise<IUser[]> {
 		const { rows } = await query('SELECT * FROM Tegra.users');
 
-		const users: IUser[] = rows.map((row: QueryResultRow) => {
+		const users: IUser[] = rows.map((row) => {
 			return {
 				id: row.id,
 				name: row.name,
@@ -35,19 +33,17 @@ class UserRepository implements IRepository {
 			[id]
 		);
 
-		const user: IUser | undefined = rows.map(
-			(row: QueryResultRow) => {
-				return {
-					id: row.id,
-					name: row.name,
-					email: row.email,
-					password: row.password,
-					roles: row.roles,
-					createdAt: row.created_at,
-					updatedAt: row.updated_at,
-				};
-			}
-		)[0];
+		const user: IUser | undefined = rows.map((row) => {
+			return {
+				id: row.id,
+				name: row.name,
+				email: row.email,
+				password: row.password,
+				roles: row.roles,
+				createdAt: row.created_at,
+				updatedAt: row.updated_at,
+			};
+		})[0];
 
 		return user;
 	}
