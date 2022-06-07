@@ -2,8 +2,8 @@ import IRepository from '../interfaces/IRepository';
 import IUser from '../interfaces/IUser';
 
 class UserService {
-	repository: IRepository;
-	constructor(repository: IRepository) {
+	repository: IRepository<IUser>;
+	constructor(repository: IRepository<IUser>) {
 		this.repository = repository;
 	}
 

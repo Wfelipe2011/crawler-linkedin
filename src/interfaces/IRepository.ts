@@ -1,11 +1,9 @@
-import IUser from './IUser';
-
-interface IRepository {
-	getAll(): Promise<IUser[]>;
-	getById(id: number): Promise<IUser | undefined>;
-	create(user: IUser): Promise<void>;
-	update(user: IUser): Promise<void>;
-	delete(id: number): Promise<void>;
+interface IRepository<T> {
+	getAll(): Promise<T[]>;
+	getById(id: number): Promise<T | undefined>;
+	create(user: T): Promise<boolean>;
+	update(user: T): Promise<boolean>;
+	delete(id: number): Promise<boolean>;
 }
 
 export default IRepository;
