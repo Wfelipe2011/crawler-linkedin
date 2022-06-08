@@ -1,16 +1,15 @@
 FROM node:16.9.0-alpine
 
-WORKDIR /src
+WORKDIR /app
 
-COPY package.json .
+# COPY package.json /app
+COPY . /app
 
-RUN yarn
-
-COPY . ./
+RUN npm install
 
 EXPOSE 3000
 
 ENV TZ=Brazil/East
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-CMD ["yarn", "dev"]
+CMD ["npm", "run", "dev"]
