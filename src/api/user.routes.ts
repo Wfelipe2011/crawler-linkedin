@@ -1,12 +1,13 @@
 import { Router } from 'express';
 
-import query from '../config/database';
 import logger from '../config/logger';
+import PostgresDatabase from '../infra/PostgresDatabase';
 import UserRepository from '../repositories/UserRepository';
 import UserService from '../services/UserService';
 
 const userRoutes = Router();
-const userRepository = new UserRepository(query);
+const postgresDatabase = new PostgresDatabase();
+const userRepository = new UserRepository(postgresDatabase);
 const userService = new UserService(userRepository);
 
 userRoutes.get('/', async (req, res) => {
