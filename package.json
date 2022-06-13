@@ -7,7 +7,7 @@
 	"scripts": {
 		"build": "tsc",
 		"dev": "ts-node-dev --transpile-only --ignore-watch node_modules src/server.ts",
-		"lint": "eslint '**/*.ts'",
+		"lint": "eslint '**/*.ts' --max-warnings=0",
 		"test": "jest --detectOpenHandles",
 		"prettier": "prettier --write '**/*.ts'"
 	},

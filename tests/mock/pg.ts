@@ -1,9 +1,8 @@
 import PGMock2 from 'pgmock2';
-import PgMock2 from 'pgmock2';
 
 import IDatabaseConnection from '../../src/interfaces/IDatabaseConnection';
 
-const mockPg = new PgMock2();
+const mockPg = new PGMock2();
 
 const users = [
 	{
