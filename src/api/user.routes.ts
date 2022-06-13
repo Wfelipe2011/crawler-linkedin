@@ -5,12 +5,12 @@ import PostgresDatabase from '../infra/PostgresDatabase';
 import UserRepository from '../repositories/UserRepository';
 import UserService from '../services/UserService';
 
-const userRoutes = Router();
+const usersRoutes = Router();
 const postgresDatabase = new PostgresDatabase();
 const userRepository = new UserRepository(postgresDatabase);
 const userService = new UserService(userRepository);
 
-userRoutes.get('/', async (req, res) => {
+usersRoutes.get('/', async (req, res) => {
 	try {
 		const users = await userService.getAll();
 		res.send(users);
@@ -19,4 +19,4 @@ userRoutes.get('/', async (req, res) => {
 	}
 });
 
-export { userRoutes };
+export { usersRoutes };
