@@ -9,7 +9,7 @@ describe('Test my server', () => {
 	});
 
 	it('should return a welcome message', async () => {
-		const response = await request(app)
+		await request(app)
 			.get('/')
 			.expect('Content-Type', /json/)
 			.expect(200, {
