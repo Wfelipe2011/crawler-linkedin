@@ -1,5 +1,3 @@
-import IUser from '../../interfaces/IUser';
-
 export {};
 
 declare global {

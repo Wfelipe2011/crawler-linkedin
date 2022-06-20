@@ -5,7 +5,7 @@ const verifyToken = async (
 	req: Request,
 	res: Response,
 	next: NextFunction
-) => {
+): Promise<void | Response> => {
 	const authHeader = req.headers.token as string;
 
 	if (authHeader) {
@@ -34,16 +34,16 @@ const verifyTokenAndAuthorization = (
 	req: Request,
 	res: Response,
 	next: NextFunction
-) => {
+): void => {
 	verifyToken(req, res, () => {
 		const { user } = req;
 
 		if (user && (req.params.id === user.id || user.isAdmin)) {
 			next();
 		} else {
-			res
-				.status(403)
-				.json({ message: 'You can not update this profile' });
+			res.status(403).json({
+				message: 'You can not update this profile',
+			});
 		}
 	});
 };
@@ -52,16 +52,16 @@ const verifyTokenAndAdmin = (
 	req: Request,
 	res: Response,
 	next: NextFunction
-) => {
+): void => {
 	verifyToken(req, res, () => {
 		const { user } = req;
 
 		if (user && user.isAdmin) {
 			next();
 		} else {
-			res
-				.status(403)
-				.json({ message: 'You can not allowed to do that' });
+			res.status(403).json({
+				message: 'You can not allowed to do that',
+			});
 		}
 	});
 };
