@@ -12,10 +12,10 @@ const PORT = config.server.port || 3000;
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors());
-app.use('/api/v1', apiRoutes);
+app.use(apiRoutes);
 
 app.use(
-	'/api/v1/api-docs',
+	'/api-docs',
 	swaggerUi.serve,
 	swaggerUi.setup(swaggerDocument)
 );

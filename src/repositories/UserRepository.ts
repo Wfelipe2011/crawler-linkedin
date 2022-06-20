@@ -48,7 +48,13 @@ class UserRepository implements IRepository<IUser> {
 	async update(user: IUser): Promise<boolean> {
 		const { rows } = await this.databaseHandler.query(
 			'UPDATE Tegra.users SET name = $1, email = $2, password = $3, roles = $4 WHERE id = $5 RETURNING *',
-			[user.name, user.email, user.password, user.roles, user.id]
+			[
+				user.name,
+				user.email,
+				user.password,
+				user.roles,
+				user.id,
+			]
 		);
 
 		const updatedUser = rows[0] as IUser;
