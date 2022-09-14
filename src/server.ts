@@ -1,6 +1,6 @@
 import app, { PORT } from './app';
 import logger from './config/logger';
-import job from './jobs/cronJob';
+
 
 /**
  * How to use logger
@@ -12,6 +12,5 @@ import job from './jobs/cronJob';
  */
 
 app.listen(PORT, () => {
-	job.start();
 	logger.info(`Server is running on port ${PORT}`);
 });

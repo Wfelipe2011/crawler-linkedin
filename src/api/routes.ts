@@ -1,9 +1,9 @@
 import express from 'express';
 
-import { usersRoutes } from './user.routes';
+import { crawlerRoutes } from './crawler.routes';
 
 const apiRoutes = express.Router();
 
-apiRoutes.use('/users', usersRoutes);
+apiRoutes.use('/crawlers', crawlerRoutes);
 
 export { apiRoutes };
