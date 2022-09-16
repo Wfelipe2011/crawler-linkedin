@@ -1,12 +1,19 @@
 /* eslint-disable prettier/prettier */
 import logger from '../config/logger';
 import { AutoScroll } from '../entities/AutoScroll';
-import { extractorProfileLinkedIn, sanitizeHtml } from '../extratorProfileLinkedin';
 import { IPage } from '../interfaces/IPage';
+import { SELECTORS } from '../selectors';
+
+interface Profile {
+	avatar: string | null;
+	name: string;
+	title: string;
+	local: string;
+}
 
 /**
  * # Pegar dados do perfil do linkedin
- * 		[] Pegar dados do pessoais
+ * 		[x] Pegar dados do pessoais
  * 		[] Pegar dados de experiência
  * 		[] Pegar dados de educação
  * 		[] Pegar dados de habilidades
@@ -29,14 +36,36 @@ export class MiningProfile {
 			logger.info('Scrolling page...');
 			await this.autoScroll.execute();
 			logger.info('Scrolling done');
-			const html = await this.page.evaluate(
-				() => document.body.innerHTML
-			);
-			const htmlClean = sanitizeHtml(html);
-			const profile = extractorProfileLinkedIn(htmlClean);
-			return profile;
+			const profile = await this.getProfileData();
+			return {
+				profile,
+			};
 		} catch (error) {
 			console.log(error);
 		}
+	}
+
+	private async getProfileData(): Promise<Profile>{
+		return await this.page.evaluate((SELECTORS) => {
+			const [avatar] = document.getElementsByClassName(
+				SELECTORS.CLASS_NAME.avatar
+			)as HTMLCollectionOf<HTMLElement>;
+			const [name] = document.getElementsByClassName(
+				SELECTORS.CLASS_NAME.name
+			)as HTMLCollectionOf<HTMLElement>;
+			const [title] = document.getElementsByClassName(
+				SELECTORS.CLASS_NAME.title
+			)as HTMLCollectionOf<HTMLElement>;
+			const [local] = document.getElementsByClassName(
+				SELECTORS.CLASS_NAME.local
+			) as HTMLCollectionOf<HTMLElement>;
+			
+			return {
+					name: name?.innerText,
+					avatar: avatar?.getAttribute('src'),
+					title: title?.innerText,
+					local: local?.innerText,
+			};
+		}, SELECTORS);
 	}
 }
