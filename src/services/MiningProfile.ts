@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import logger from '../config/logger';
 import { AutoScroll } from '../entities/AutoScroll';
+import { LinkedinHtml } from '../helpers/LinkedinHtml';
 import { IPage } from '../interfaces/IPage';
 import { SELECTORS } from '../selectors';
 
@@ -14,6 +15,7 @@ interface Profile {
 /**
  * # Pegar dados do perfil do linkedin
  * 		[x] Pegar dados do pessoais
+ * 		[x] Pegar dados Sobre
  * 		[] Pegar dados de experiência
  * 		[] Pegar dados de educação
  * 		[] Pegar dados de habilidades
@@ -37,8 +39,10 @@ export class MiningProfile {
 			await this.autoScroll.execute();
 			logger.info('Scrolling done');
 			const profile = await this.getProfileData();
+			const about = await this.getAboutData();
 			return {
 				profile,
+				about
 			};
 		} catch (error) {
 			console.log(error);
@@ -67,5 +71,16 @@ export class MiningProfile {
 					local: local?.innerText,
 			};
 		}, SELECTORS);
+	}
+
+	private async getAboutData(): Promise<any> {
+		const sectionAboutHtml = await this.page.evaluate(() => {
+			const about = document.getElementById('about');
+			const sectionAboutId = about?.parentElement?.id as string;
+			const sectionAbout = document.getElementById(sectionAboutId);
+			return sectionAbout?.innerHTML;
+		}) as string;
+
+		return LinkedinHtml.sanitize(sectionAboutHtml).replace('…ver mais ', '').replace(' Sobre', '');
 	}
 }

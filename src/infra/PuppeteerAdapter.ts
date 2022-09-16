@@ -1,12 +1,10 @@
 import {
-	Browser,
-	Page,
-	PuppeteerLaunchOptions,
-	launch,
+	BrowserContext, launch, Page,
+	PuppeteerLaunchOptions
 } from 'puppeteer';
 
 export class PuppeteerAdapter {
-	private browser!: Browser;
+	private browser!: BrowserContext;
 	// eslint-disable-next-line prettier/prettier
 	constructor(readonly options?: PuppeteerLaunchOptions) {
 		this.execute();
@@ -14,11 +12,11 @@ export class PuppeteerAdapter {
 
 	private async execute(): Promise<void> {
 		if (this.browser) return;
-		this.browser = await launch({
+		const browser = await launch({
 			headless: false,
 			ignoreHTTPSErrors: true,
 			defaultViewport: null,
-			slowMo: 250,
+			slowMo: 150,
 			args: [
 				'--no-sandbox',
 				'--start-maximized',
@@ -27,6 +25,7 @@ export class PuppeteerAdapter {
 			],
 			...this.options,
 		});
+		this.browser = await browser.createIncognitoBrowserContext();
 	}
 
 	async closeBrowser(): Promise<void> {
