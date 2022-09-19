@@ -8,8 +8,8 @@ import { MiningProfile } from '../services/MiningProfile';
 
 const crawlerRoutes = Router();
 const puppeteerAdapter = new PuppeteerAdapter({
-	headless: true,
-	slowMo: 50,
+	headless: false,
+	slowMo: 150,
 });
 async function testCrawler(url: string): Promise<void> {
 	const page = await puppeteerAdapter.newPage();
@@ -23,10 +23,10 @@ async function testCrawler(url: string): Promise<void> {
 		waitUntil: 'domcontentloaded',
 	});
 	await SleepTime.execute(3000);
-	const autoScroll = new AutoScroll(page, 50);
+	const autoScroll = new AutoScroll(page, 100);
 	const mining = new MiningProfile(page, autoScroll);
 	const data = await mining.execute();
-	page.close();
+	await page.close();
 	return data;
 }
 
