@@ -10,7 +10,6 @@ export class PuppeteerAdapter {
 	private async execute(): Promise<void> {
 		if (this.browser) return;
 		const browser = await launch({
-			headless: true,
 			ignoreHTTPSErrors: true,
 			slowMo: 150,
 			args: ['--no-sandbox', '--start-maximized', '--disable-setuid-sandbox', '--enable-features=NetworkService'],

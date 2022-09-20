@@ -8,7 +8,7 @@ import { MiningProfile } from '../services/MiningProfile';
 
 const crawlerRoutes = Router();
 const puppeteerAdapter = new PuppeteerAdapter({
-	headless: false,
+	headless: true,
 	slowMo: 150,
 });
 async function testCrawler(url: string): Promise<void> {
