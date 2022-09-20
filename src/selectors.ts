@@ -3,8 +3,7 @@ export const SELECTORS = {
 		name: 'text-heading-xlarge inline t-24 v-align-middle break-words',
 		avatar: 'pv-top-card-profile-picture__image pv-top-card-profile-picture__image',
 		title: 'text-body-medium break-words',
-		formation:
-			'inline-show-more-text--is-collapsed-with-line-clamp',
+		formation: 'inline-show-more-text--is-collapsed-with-line-clamp',
 		local: 'text-body-small inline t-black--light break-words',
 	},
 	DOM_REFERENCE: {
@@ -31,6 +30,13 @@ export const SELECTORS = {
 			link: ` > div > div.display-flex.flex-column.full-width.align-self-center > div.pvs-list__outer-container > ul > li > div > a`,
 			institution: ` > div > div.display-flex.flex-column.full-width.align-self-center > div.display-flex.flex-row.justify-space-between > a > span:nth-child(2) > span:nth-child(1)`,
 			date: ` > div > div.display-flex.flex-column.full-width.align-self-center > div.display-flex.flex-row.justify-space-between > a > span:nth-child(3) > span:nth-child(1)`,
+		},
+		skill: {
+			name: ` > div > div.display-flex.flex-column.full-width.align-self-center > div.display-flex.flex-row.justify-space-between > div.display-flex.flex-column.full-width > div > span > span:nth-child(1)`,
+		},
+		language: {
+			name: ` > div > div.display-flex.flex-column.full-width.align-self-center > div > div.display-flex.flex-column.full-width > div > span > span:nth-child(1)`,
+			level: ` > div > div.display-flex.flex-column.full-width.align-self-center > div > div.display-flex.flex-column.full-width > span > span:nth-child(1)`,
 		},
 	},
 };

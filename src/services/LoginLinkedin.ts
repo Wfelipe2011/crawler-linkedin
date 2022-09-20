@@ -1,5 +1,4 @@
 import logger from '../config/logger';
-import { SleepTime } from '../entities/SleepTime';
 import { IPage } from '../interfaces/IPage';
 
 const SELECTORS = {
@@ -24,12 +23,11 @@ export class LoginLinkedin {
 				waitUntil: 'domcontentloaded',
 			});
 			await this.page.type(SELECTORS.login, login, {
-				delay: 100,
+				delay: 50,
 			});
 			await this.page.type(SELECTORS.password, password, {
-				delay: 100,
+				delay: 50,
 			});
-			await SleepTime.execute(3000);
 			await this.page.click(SELECTORS.enter);
 			logger.info(`Passou do login o job: ${login}`);
 		} catch (error) {

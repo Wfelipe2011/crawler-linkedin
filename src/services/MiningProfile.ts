@@ -3,6 +3,7 @@ import logger from '../config/logger';
 import { AutoScroll } from '../entities/AutoScroll';
 import { SleepTime } from '../entities/SleepTime';
 import { LinkedinHtml } from '../helpers/LinkedinHtml';
+import { PuppeteerAdapter } from '../infra/PuppeteerAdapter';
 import { IPage } from '../interfaces/IPage';
 import { SELECTORS } from '../selectors';
 
@@ -11,6 +12,7 @@ interface IProfile {
 	name: string;
 	title: string;
 	local: string;
+	about: string;
 }
 
 interface IExperience {
@@ -37,6 +39,11 @@ interface ICertificate {
 	link: string;
 }
 
+interface ILanguage {
+	language: string;
+	level: string;
+}
+
 /**
  * # Pegar dados do perfil do linkedin
  * 		[x] Pegar dados do pessoais
@@ -53,21 +60,27 @@ interface ICertificate {
  */
 
 export class MiningProfile {
-	constructor(private page: IPage, private autoScroll: AutoScroll) {}
+	constructor(private browser: PuppeteerAdapter, private baseUrl:string) {
+	
+	}
 
 	async execute(): Promise<any> {
 		try {
-			const profile = await this.getProfileData();
-			const about = await this.getAboutData();
-			const experience = await this.getExperienceData();
-			const education = await this.getEducationData();
-			const certificate = await this.getCertificateData();
+			const profilePromise =  this.getProfileData();
+			const experiencePromise =  this.getExperienceData();
+			const educationPromise =  this.getEducationData();
+			const certificatePromise =  this.getCertificateData();
+			const skillsPromise =  this.getSkillsData();
+			const languagesPromise =  this.getLanguagesData();
+			const [profile, experience, education, certificate, skills, languages] = 
+			await Promise.all([profilePromise, experiencePromise, educationPromise, certificatePromise, skillsPromise, languagesPromise]);
 			return {
 				profile,
-				about,
 				experience,
 				education,
 				certificate,
+				skills,
+				languages
 			};
 		} catch (error) {
 			console.log(error);
@@ -76,8 +89,12 @@ export class MiningProfile {
 
 	private async getProfileData(): Promise<IProfile> {
 		try {
-			await this.executeScroll();
-			return await this.page.evaluate((SELECTORS) => {
+			const page = await this.browser.newPage();
+			await page.goto(this.baseUrl, {
+				waitUntil: 'domcontentloaded',
+			});
+			await this.executeScroll(page);
+			const profile = await page.evaluate((SELECTORS) => {
 				const [avatar] = document.getElementsByClassName(
 					SELECTORS.CLASS_NAME.avatar
 				) as HTMLCollectionOf<HTMLElement>;
@@ -98,54 +115,43 @@ export class MiningProfile {
 					local: local?.innerText,
 				};
 			}, SELECTORS);
+			const sectionAboutHtml = (await page.evaluate(() => {
+				const about = document.getElementById('about');
+				const sectionAboutId = about?.parentElement?.id as string;
+				const sectionAbout = document.getElementById(sectionAboutId);
+				return sectionAbout?.innerHTML;
+			})) as string;
+			const about = LinkedinHtml.sanitize(sectionAboutHtml).replace('…ver mais ', '').replace(' Sobre', '');
+			await page.close();
+			return {
+				...profile,
+				about,
+			};
 		} catch (error) {
 			console.log(error);
 			return {} as IProfile;
 		}
 	}
 
-	private async getAboutData(): Promise<string> {
-		try {
-			const sectionAboutHtml = (await this.page.evaluate(() => {
-				const about = document.getElementById('about');
-				const sectionAboutId = about?.parentElement?.id as string;
-				const sectionAbout = document.getElementById(sectionAboutId);
-				return sectionAbout?.innerHTML;
-			})) as string;
-
-			return LinkedinHtml.sanitize(sectionAboutHtml).replace('…ver mais ', '').replace(' Sobre', '');
-		} catch (error) {
-			console.log(error);
-			return '';
-		}
-	}
-
-	private async executeScroll(): Promise<void> {
-		await SleepTime.execute(3000);
+	private async executeScroll(page: IPage): Promise<void> {
+		const autoScroll = new AutoScroll(page, 100);
+		await SleepTime.execute(1500);
 		logger.info('Scrolling page...');
-		await this.autoScroll.execute();
+		await autoScroll.execute();
 		logger.info('Scrolling done');
-		await SleepTime.execute(3000);
-	}
-
-	private async returnPageProfile(): Promise<void> {
-		await this.page.evaluate(() => {
-			window.scrollTo({ top: 0, behavior: 'smooth' });
-			(document.querySelector('[aria-label="Voltar à página principal do perfil"]') as any).click();
-		});
-		await SleepTime.execute(3000);
 	}
 
 	private async getExperienceData(): Promise<IExperience[]> {
 		try {
-			const urlProfileExperience = this.page.url() + 'details/experience/';
-			await this.page.goto(urlProfileExperience, {
+			const page = await this.browser.newPage();
+			const urlProfileExperience = this.baseUrl + 'details/experience/';
+			await page.goto(urlProfileExperience, {
 				waitUntil: 'domcontentloaded',
 			});
+			
+			await this.executeScroll(page);
 
-			await this.executeScroll();
-
-			const sectionExperienceHtml = (await this.page.evaluate((DOM_REFERENCE) => {
+			const sectionExperienceHtml = (await page.evaluate((DOM_REFERENCE) => {
 				const ul = document.querySelectorAll('[class="pvs-list "]');
 				const haveOtherPositions = ul.length > 1;
 				const experienceList = haveOtherPositions ? ul[1].children : ul[0]?.children;
@@ -197,11 +203,14 @@ export class MiningProfile {
 						date: date ? date : date2,
 						location: location ? location : location2,
 					};
-					experience.push(experienceItem);
+
+					if(title || description || competence || companyName || companyImageUrl || date || location) {
+						experience.push(experienceItem);
+					}
 				}
 				return experience;
 			}, SELECTORS.DOM_REFERENCE)) as IExperience[];
-			await this.returnPageProfile();
+			await page.close();
 			return sectionExperienceHtml;
 		} catch (error) {
 			console.log(error);
@@ -210,14 +219,15 @@ export class MiningProfile {
 	}
 
 	private async getEducationData(): Promise<IEducation[]> {
-		const urlProfileEducation = this.page.url() + 'details/education/';
-		await this.page.goto(urlProfileEducation, {
+		const page = await this.browser.newPage();
+		const urlProfileEducation = this.baseUrl + 'details/education/';
+		await page.goto(urlProfileEducation, {
 			waitUntil: 'domcontentloaded',
 		});
 
-		await this.executeScroll();
+		await this.executeScroll(page);
 
-		const sectionEducationHtml = await this.page.evaluate((DOM_REFERENCE) => {
+		const sectionEducationHtml = await page.evaluate((DOM_REFERENCE) => {
 			const ul = document.querySelectorAll('[class="pvs-list "]');
 			const haveOtherPositions = ul.length > 1;
 			const educationList = haveOtherPositions ? ul[0].children : ul[0]?.children;
@@ -241,24 +251,29 @@ export class MiningProfile {
 					courseName,
 					date,
 				};
-				education.push(educationItem);
+
+				if(institution || courseName) education.push(educationItem);
+				
+
+				
 			}
 			return education;
 		}, SELECTORS.DOM_REFERENCE);
 
-		await this.returnPageProfile();
+		await page.close();
 		return sectionEducationHtml;
 	}
 
 	private async getCertificateData(): Promise<ICertificate[]> {
-		const urlProfileCertificate = this.page.url() + 'details/certifications/';
-		await this.page.goto(urlProfileCertificate, {
+		const page = await this.browser.newPage();
+		const urlProfileCertificate = this.baseUrl + 'details/certifications/';
+		await page.goto(urlProfileCertificate, {
 			waitUntil: 'domcontentloaded',
 		});
 
-		await this.executeScroll();
+		await this.executeScroll(page);
 
-		const sectionCertificateHtml = await this.page.evaluate((DOM_REFERENCE) => {
+		const sectionCertificateHtml = await page.evaluate((DOM_REFERENCE) => {
 			const ul = document.querySelectorAll('[class="pvs-list "]');
 			const haveOtherPositions = ul.length > 1;
 			const certificateList = haveOtherPositions ? ul[0].children : ul[0]?.children;
@@ -280,12 +295,75 @@ export class MiningProfile {
 					date,
 					link,
 				};
-				certificate.push(certificateItem);
+				if(courseName||institution||date||link) certificate.push(certificateItem);
 			}
 			return certificate;
 		}, SELECTORS.DOM_REFERENCE);
 
-		await this.returnPageProfile();
+		await page.close();
 		return sectionCertificateHtml;
 	}
+
+	private async getSkillsData(): Promise<string[]> {
+		const page = await this.browser.newPage();
+		const urlProfileSkills = this.baseUrl + 'details/skills/';
+		await page.goto(urlProfileSkills, {
+			waitUntil: 'domcontentloaded',
+		});
+
+		await this.executeScroll(page);
+
+		const sectionSkillsHtml = await page.evaluate((DOM_REFERENCE) => {
+			const ul = document.querySelectorAll('[class="pvs-list "]');
+			const haveOtherPositions = ul.length > 1;
+			const skillsList = haveOtherPositions ? ul[0].children : ul[0]?.children;
+			const skills = [];
+
+			for (const li of skillsList) {
+				const id = '#' + li.id;
+				const skillNameSelector = id + DOM_REFERENCE.skill.name;
+				const skillName = (document.querySelector(skillNameSelector) as HTMLElement)?.innerText;
+				if(skillName) skills.push(skillName);
+			}
+			return skills;
+		}, SELECTORS.DOM_REFERENCE);
+
+		await page.close();
+		return sectionSkillsHtml;
+	}
+
+	private async getLanguagesData(): Promise<ILanguage[]> {
+		const page = await this.browser.newPage();
+		const urlProfileLanguages = this.baseUrl + 'details/languages/';
+		await page.goto(urlProfileLanguages, {
+			waitUntil: 'domcontentloaded',
+		});
+
+		await this.executeScroll(page);
+
+		const sectionLanguagesHtml = await page.evaluate((DOM_REFERENCE) => {
+			const ul = document.querySelectorAll('[class="pvs-list "]');
+			const haveOtherPositions = ul.length > 1;
+			const languagesList = haveOtherPositions ? ul[0].children : ul[0]?.children;
+			const languages = [];
+
+			for (const li of languagesList) {
+				const id = '#' + li.id;
+				const languageNameSelector = id + DOM_REFERENCE.language.name;
+				const name = (document.querySelector(languageNameSelector) as HTMLElement)?.innerText;
+				const levelSelector = id + DOM_REFERENCE.language.level;
+				const level = (document.querySelector(levelSelector) as HTMLElement)?.innerText;
+				const languageItem: ILanguage = {
+					language: name,
+					level,
+				};
+				if(name || level) languages.push(languageItem);
+			}
+			return languages;
+		}, SELECTORS.DOM_REFERENCE);
+
+		await page.close();
+		return sectionLanguagesHtml;
+	}
+
 }
