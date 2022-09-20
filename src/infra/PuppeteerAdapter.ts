@@ -12,7 +12,6 @@ export class PuppeteerAdapter {
 		const browser = await launch({
 			headless: true,
 			ignoreHTTPSErrors: true,
-			defaultViewport: null,
 			slowMo: 150,
 			args: ['--no-sandbox', '--start-maximized', '--disable-setuid-sandbox', '--enable-features=NetworkService'],
 			...this.options,
