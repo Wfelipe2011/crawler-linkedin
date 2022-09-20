@@ -1,7 +1,4 @@
-import {
-	BrowserContext, launch, Page,
-	PuppeteerLaunchOptions
-} from 'puppeteer';
+import { BrowserContext, launch, Page, PuppeteerLaunchOptions } from 'puppeteer';
 
 export class PuppeteerAdapter {
 	private browser!: BrowserContext;
@@ -13,16 +10,11 @@ export class PuppeteerAdapter {
 	private async execute(): Promise<void> {
 		if (this.browser) return;
 		const browser = await launch({
-			headless: false,
+			headless: true,
 			ignoreHTTPSErrors: true,
 			defaultViewport: null,
 			slowMo: 150,
-			args: [
-				'--no-sandbox',
-				'--start-maximized',
-				'--disable-setuid-sandbox',
-				'--enable-features=NetworkService',
-			],
+			args: ['--no-sandbox', '--start-maximized', '--disable-setuid-sandbox', '--enable-features=NetworkService'],
 			...this.options,
 		});
 		this.browser = await browser.createIncognitoBrowserContext();
